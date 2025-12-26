@@ -1,98 +1,81 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+ERP Backend — Inventory Driven System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project is a backend ERP system developed as a technical assignment for a Junior Node.js Backend Developer role.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The system follows real ERP principles: inventory changes only through documents, confirmed documents are immutable, and all operations are auditable.
 
-## Description
+Core business flow:
+Products → Purchase Receipts → Sales → Dashboard
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Tech Stack:
+Node.js
+TypeScript
+NestJS
+MongoDB (Mongoose)
+bcrypt
+JWT
+MongoDB Aggregation Pipeline
 
-## Project setup
+Implemented Modules:
 
-```bash
-$ npm install
-```
+Products:
+CRUD operations with strict tracking rules.
+Tracking types supported: SIMPLE, EXPIRABLE, SERIALIZED, LOT_TRACKED, VARIANT.
+Variant parent products are not sellable or stockable.
+Variants have their own SKU and stock.
+Tracking type cannot be changed after the product is used.
+Soft delete is implemented using is_active.
 
-## Compile and run the project
+Inventory Core:
+Centralized inventory logic acting as a single source of truth.
+Supports quantity stock, serial numbers, lot tracking, and expiration tracking.
+Negative stock is not allowed.
+Serial uniqueness is enforced.
 
-```bash
-# development
-$ npm run start
+Purchase Receipts:
+Document lifecycle: DRAFT → CONFIRMED → CANCELLED.
+Draft documents are editable and do not affect stock.
+Confirmed receipts increase stock, record purchase cost, and become immutable.
+Cancelled receipts revert stock and require a cancellation reason.
+Tracking rules are enforced based on product type.
 
-# watch mode
-$ npm run start:dev
+Sales:
+Document lifecycle: DRAFT → CONFIRMED → CANCELLED.
+Draft sales are editable and do not affect stock.
+Confirmed sales decrease stock and enforce strict tracking rules.
+Sales cannot be confirmed without sufficient stock.
+Cancelled sales restore stock and require a cancellation reason.
+Confirmed sales are immutable.
 
-# production mode
-$ npm run start:prod
-```
+Dashboard:
+Dashboard shows only confirmed documents.
+Implemented reports include sales summary, daily sales, top products, inventory summary, and purchase summary.
+All reports use MongoDB aggregation pipelines.
 
-## Run tests
+ERP Rules Enforced:
+Confirmed documents are immutable.
+Inventory changes only via purchase receipts and sales.
+No hard deletes for operational data.
+Strict document status transitions.
+Full audit trail on all documents.
 
-```bash
-# unit tests
-$ npm run test
+Allowed Status Transitions:
+DRAFT to CONFIRMED.
+DRAFT to CANCELLED.
+CONFIRMED to CANCELLED.
 
-# e2e tests
-$ npm run test:e2e
+How to Run:
+npm install
+npm run start:dev
 
-# test coverage
-$ npm run test:cov
-```
+Important Notes:
+Variant parent products cannot be purchased or sold.
+Dashboard ignores draft and cancelled documents.
+Stock can never go negative.
+Status change represents a business action, not a simple update.
 
-## Deployment
+Author:
+Ziyodillo Najmiddinov — Strong Junior Node.js Backend Developer
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+License:
+MIT
